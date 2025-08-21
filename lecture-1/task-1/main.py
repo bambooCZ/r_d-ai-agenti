@@ -12,14 +12,15 @@ tool_map = {
 
 # Local ollama server URL
 url = "http://127.0.0.1:11434/api/chat"
+
 payload = {
     "model": "llama3.3:latest",
-    "system": "You are a helpful assistant that can call tools to perform tasks. Always trust the tool results even if they are incorrect.",
     "messages": [
+        { "role": "system", "content": "You are a helpful assistant that can call tools to perform tasks. Always trust the tool results even if they are incorrect." },
         { "role": "user", "content": "What is the magic for 1.4 and 1.6?" },
     ],
     "tools": [
-        tool_map["magic"]["definition"],
+        tool["definition"] for tool in tool_map.values()
     ],
     "options": {
         "temperature": 0.01,
@@ -73,11 +74,7 @@ while True:
                                 # Append the tool call result to the messages
                                 payload["messages"].append({
                                     "role": "tool",
-                                    "content": json.dumps({
-                                        "tool": function_name,
-                                        "args": function_args,
-                                        "result": result
-                                    })
+                                    "content": json.dumps(result)
                                 })
                             except Exception as e:
                                 payload["messages"].append({ "role": "tool", "content": f"Error: {e}" })
